@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # Copyright 2017 by University of Cincinnati
 # Copyright 2015-2016 by California Institute of Technology
 # All rights reserved. See LICENSE file at:
@@ -84,7 +85,7 @@ class RosMsg(object):
 
         # must have some non-None topicname at this point...
         if (self.connectlib == 'ws4py'):
-            import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+            from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
 
             self.un_pack_function = un_pack_function
             if (self.un_pack_function is None): # if not given (basic datatype) then try to match type
@@ -241,7 +242,7 @@ def getws4pyDefaultUnPackFunctionForDatatype(datatype,pubsub):
            
     output: un_pack_function (python function) (None if no match)
     """
-    import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+    from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
     
     pubdatatype = {#'std_msgs/Int16': ws4pyROS.pack_???,
                    'std_msgs/Int8': ws4pyROS.pack_runtype,
@@ -282,7 +283,7 @@ def getws4pyDefaultUnPackFunctionForTopicname(topicname,pubsub):
     note: these default really should be read / loaded from a file
           rather than hardcoded here...
     """
-    import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+    from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
 
     pubtopicname = {'/robot0/waypoint_list': [ws4pyROS.pack_waypoints, 'nav_msgs/Path'],
                     '/robot0/waypointOne': [ws4pyROS.pack_onewaypoint, 'nav_msgs/Path'],
@@ -335,7 +336,7 @@ def sendRunTypeValueAndShutdownWs4py(runtypeSend,connection,ws_runtype_in,ws_run
     
     output: n/a (closes ws_runtype_in and ws_runtype_out when done)
     """
-    import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+    from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
     
     if (ws_runtype_out == None):
         ws_runtype_out = RosMsg('ws4py', connection, 'pub', '/robot0/runtype', 'std_msgs/Int8', ws4pyROS.pack_runtype)
@@ -365,15 +366,24 @@ class BlankClass(object): # blank class object allows .___ to be added to this o
 #
 if __name__=="__main__":
 
-    # Note that the following may only work if you run this python script from the directory in which it resides...
+    # Note that the following should work so long as you modify the sys.path
+    # to include the directory which holds the top-level directory of each
+    # package that you need, and you'll need to include __init__.py in each
+    # directory inside that "package" so that you can import what you need.
     #
-    # This is done so you can use the import command on other/separate modules (this is adding it to the beginning like it should've automagically done for you); remember to create an empty __init__.py in the local directory for this to load properly
-    import os
+    # This should be done for every python-executable file. The executable /
+    # file that invokes the python interpreter needs to be able to find all
+    # packages that the entire run needs. Changing sys.path from this invoked
+    # file (relative to the invoked file) works because everything in a
+    # python (interpreter run) instance sees the same sys.path.
+    #
     import sys # for sys.exit() and sys.path.append()
-    sys.path.append(os.getcwd()) # modify sys.path to include current directory
-    sys.path.append(os.getcwd() + '/../common') # modify sys.path to include ../common directory
-    import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
-#    import rosConnectWrapper as rC # gives RosMsg, call via: rC.RosMsg
+    file_dir = sys.path[0] # *** initialized on program startup, directory of the script used to invoke the python interpreter ***
+    sys.path.append(file_dir + '/../..') # modify sys.path to include directory containing rss_git_lite "package"
+    #print("sys.path = %r\n" % sys.path)
+
+    from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+#    from rss_git_lite.common import rosConnectWrapper as rC # gives RosMsg, call via: rC.RosMsg
 
     # works:
     #from nav_msgs.msg import Odometry
@@ -396,7 +406,7 @@ if __name__=="__main__":
     fullpose.angular.y = 0
     fullpose.angular.z = 0
 
-    import getConnectionIPaddress as gC
+    from rss_git_lite.common import getConnectionIPaddress as gC
     connection = gC.getConnectionIPaddress()
     #connection = "ws://localhost:9090/" # example string for connecting to rosbridge_server
     #connection = gC.getConnectionIPaddress(3) # this should give back: "ws://localhost:9090/"

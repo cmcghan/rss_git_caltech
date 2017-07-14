@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # Copyright 2017 by University of Cincinnati
 # Copyright 2014-2016 by California Institute of Technology
 # All rights reserved. See LICENSE file at:
@@ -876,7 +877,23 @@ if __name__=="__main__":
     fullpose.angular.y = 0
     fullpose.angular.z = 0
     
-    import getConnectionIPaddress as gC
+    # Note that the following should work so long as you modify the sys.path
+    # to include the directory which holds the top-level directory of each
+    # package that you need, and you'll need to include __init__.py in each
+    # directory inside that "package" so that you can import what you need.
+    #
+    # This should be done for every python-executable file. The executable /
+    # file that invokes the python interpreter needs to be able to find all
+    # packages that the entire run needs. Changing sys.path from this invoked
+    # file (relative to the invoked file) works because everything in a
+    # python (interpreter run) instance sees the same sys.path.
+    #
+    import sys # for sys.exit() and sys.path.append()
+    file_dir = sys.path[0] # *** initialized on program startup, directory of the script used to invoke the python interpreter ***
+    sys.path.append(file_dir + '/../..') # modify sys.path to include directory containing rss_git_lite "package"
+    #print("sys.path = %r\n" % sys.path)
+    
+    from rss_git_lite.common import getConnectionIPaddress as gC
     connection = gC.getConnectionIPaddress()
     #connection = "ws://localhost:9090/" # example string for connecting to rosbridge_server
     #connection = gC.getConnectionIPaddress(3) # this should give back: "ws://localhost:9090/"
@@ -915,14 +932,7 @@ if __name__=="__main__":
         #
         # example code for sending waypoints using packing function to translate datalist to JSON format
         #
-#        # Note that the following may only work if you run this python script from the directory in which it resides...
-#        #
-#        # This is done so you can use the import command on other/separate modules (this is adding it to the beginning like it should've automagically done for you); remember to create an empty __init__.py in the local directory for this to load properly
-#        import os
-#        import sys # for sys.exit() and sys.path.append()
-#        sys.path.append(os.getcwd()) # modify sys.path to include current directory
-#        sys.path.append(os.getcwd() + '/../common') # modify sys.path to include ../common directory
-#        import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
+#        from rss_git_lite.common import ws4pyRosMsgSrvFunctions_gen as ws4pyROS
 #        #.connect(ROS topic, ROS msg type, data packing function (see above))
 #        ws_waypts_out = ws4pyROS.PubClient(connection)
 #        ws_waypts_out.connect('/robot0/waypoint_list','nav_msgs/Path',ws4pyROS.pack_waypoints)

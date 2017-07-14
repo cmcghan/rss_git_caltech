@@ -8,15 +8,25 @@
 
 from time import sleep
 
-# Note that the following may only work if you run this python script from the directory in which it resides...
+# -- this file is not executable, must add rss_git_lite to python path prior to import and use!!
 #
-# This is done so you can use the import command on other/separate modules (this is adding it to the beginning like it should've automagically done for you); remember to create an empty __init__.py in the local directory for this to load properly
-import os
-import sys # for sys.exit() and sys.path.append()
-sys.path.append(os.getcwd()) # modify sys.path to include current directory
-sys.path.append(os.getcwd() + '/../common') # modify sys.path to include ../common directory
+# Note that the following should work so long as you modify the sys.path
+# to include the directory which holds the top-level directory of each
+# package that you need, and you'll need to include __init__.py in each
+# directory inside that "package" so that you can import what you need.
+#
+# This should be done for every python-executable file. The executable /
+# file that invokes the python interpreter needs to be able to find all
+# packages that the entire run needs. Changing sys.path from this invoked
+# file (relative to the invoked file) works because everything in a
+# python (interpreter run) instance sees the same sys.path.
+#
+#import sys # for sys.exit() and sys.path.append()
+#file_dir = sys.path[0] # *** initialized on program startup, directory of the script used to invoke the python interpreter ***
+#sys.path.append(file_dir + '/../..') # modify sys.path to include directory containing rss_git_lite "package"
+#print("sys.path = %r\n" % sys.path)
 
-import ws4pyRosParamFunctions as wsPF
+from rss_git_lite.common import ws4pyRosParamFunctions as wsPF
 import numpy as np
 
 def receiveInitPositionParamServer(connection):
@@ -176,12 +186,12 @@ def generalRecvTopicsServicesList(connection,servicestr='/rosapi/topics',topicst
     output: data (list OF STRINGS -- CONVERSION MAY BE REQUIRED!!)
     
     example call:
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         listOfTopics = wsF.generalRecvTopicsServicesList(connection,'/rosapi/services',None,'nonblock')
         # returns a list of strings or None
     
     example call if looking/checking for existence of a specific topic:
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         doesTopicExist = wsF.generalRecvTopicsServicesList(connection,"/rosapi/topics","/RosAria/cmd_vel",'block')
         # returns one of: {True,False,None}
         
@@ -259,7 +269,7 @@ def generalRecvParamServer(connection,globaltopic,subnames,blockType='nonblock',
     output: data (list, or list of lists, OF STRINGS -- CONVERSION MAY BE REQUIRED!!)
     
     example call:
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         startpt = wsF.generalRecvParamServer(connection,"/globals/startpt",['x,'y','z'],'nonblock')
         # receives: /globals/startpt/x , /globals/startpt/y , /globals/startpt/z 
         # e.g.: startpt = [ [1.0,2.0,3.0] ]
@@ -267,7 +277,7 @@ def generalRecvParamServer(connection,globaltopic,subnames,blockType='nonblock',
     example for recursive call:
         globaltopic = '/globals/startinfo/'
         subnames = [ ['loc',['x',y']] ]
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         startpt = wsF.generalRecvParamServer(connection,globaltopic,subnames,'block')
         # receives: /globals/startinfo/loc/x , /globals/startinfo/loc/y
         # e.g.: startpt = [ [1.0,2.0] ]
@@ -348,7 +358,7 @@ def generalSendParamServer(connection,globaltopic,subnames,data):
     
     example call:
         startpt = [ [1.0,2.0,3.0] , ... ]
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         wsF.generalSendParamServer(connection,"/globals/startpt",['x,'y','z'],startpt[0])
         # gives: /globals/startpt/x , /globals/startpt/y , /globals/startpt/z 
     
@@ -356,7 +366,7 @@ def generalSendParamServer(connection,globaltopic,subnames,data):
         startpt = [ [1.0,2.0] ]
         globaltopic = '/globals/startinfo/'
         subnames = [ ['loc',['x',y']] ]
-        import ws4pyFunctions as wsF
+        from rss_git_lite.common import ws4pyFunctions as wsF
         wsF.generalSendParamServer(connection,globaltopic,subnames,startpt)
         gives: /globals/startinfo/loc/x , /globals/startinfo/loc/y
     """
