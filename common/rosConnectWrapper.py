@@ -412,36 +412,45 @@ if __name__=="__main__":
     #connection = gC.getConnectionIPaddress(3) # this should give back: "ws://localhost:9090/"
 
     try:
+        # to "read" something here, try at the commandline before running this program: `rostopic pub /robot0/runtype std_msgs/Int8 "data: 12" -l`
         ws = RosMsg('ws4py', connection, 'sub', '/robot0/runtype', 'std_msgs/Int8', ws4pyROS.unpack_runtype)
         # retrieves data if it exists, None if no receipt since last call
         #runtype = ws.copy_and_clear_received() # receive "directly", no checks on channel pub/sub status
         runtype = ws.receive() # "safer"-receive
-        #print("runtype = %r " % runtype)
+        if runtype is None:
+            print("No data received on topic '/robot/runtype'")
+        else:
+            print("Data received from topic '/robot0/runtype'!")
+            print("runtype = %r " % runtype)
 
         #
         # if you are running MobileSim and RosAria, you could use the below command to control the robot's motion:
+        # (to "hear" this, try at the commandline before running this program: `rostopic echo /RosAria/cmd_vel`)
         #
         ws2 = RosMsg('ws4py', connection, 'pub', '/RosAria/cmd_vel', 'geometry_msgs/Twist', ws4pyROS.pack_cmdvel)
         #
         # if you are running p3dx in gazebo, you could use this ws2 instead set up control the robot's motion:
+        # (to "hear" this, try at the commandline before running this program: `rostopic echo /cmd_vel`)
         #
         #ws2 = RosMsg('ws4py', connection, 'pub', '/cmd_vel', 'geometry_msgs/Twist', ws4pyROS.pack_cmdvel)
         # then set up and send the command:
         cmdvelcmd = {'linear': {'x': fullpose.linear.x, 'y': fullpose.linear.y, 'z': fullpose.linear.z}, \
                      'angular': {'x': fullpose.angular.x, 'y': fullpose.angular.y, 'z': fullpose.angular.z}}
         ws2.rosconn.send_message(cmdvelcmd) # to send directly in JSON format through ws4py connection interface
-        #print("cmdvelcmd sent!\n%r" % cmdvelcmd)
+        print("cmdvelcmd sent!\n%r" % cmdvelcmd)
         
         #
         # example code for sending waypoints using packing function to translate datalist to JSON format
+        # (to "hear" this, try at the commandline before running this program: `rostopic echo /robot0/waypoint_list`)
         #
         ws_waypts_out = RosMsg('ws4py', connection, 'pub', '/robot0/waypoint_list', 'nav_msgs/Path', ws4pyROS.pack_waypoints)
         waypoints_to_send = [ [0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0] ] # list of lists
         # send waypoint(s), waytype=1 ([x,y] points, no set orientation)
         #ws_waypts_out.send_pieces([waypoints_to_send, 1]) # send directly, no checks on channel pub/sub status
         ws_waypts_out.send([waypoints_to_send, 1]) # "safer"-send
-        #print("waypoints_to_send sent!\n%r" % waypoints_to_send)
+        print("waypoints_to_send sent!\n%r" % waypoints_to_send)
         
+        print("sleeping 3 seconds, then exiting...")
         sleep(3)
     except KeyboardInterrupt:
         ws.closeNow()
