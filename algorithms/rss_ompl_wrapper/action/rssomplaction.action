@@ -1,0 +1,20 @@
+#goal definition
+float32[] rstart
+float32[] rend
+#int32[][] intmap # can't do list of lists in ROS, so pack into string and unpack at other end
+string intmap
+#rover = pc.box2poly()
+int32 growlen
+float32 timetry
+int32 retries
+float32[] rParams
+string plannerstr
+int32 pts_calcd
+---
+#result definition
+bool planstatus
+#float32[][] rpath # can't do list of lists in ROS, so pack into string and unpack at other end
+string rpath
+---
+#feedback
+int32 unused
