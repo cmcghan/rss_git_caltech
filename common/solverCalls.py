@@ -38,7 +38,7 @@ def setupSolverParams(connection,globallayertopic = "/globals/habitual/",raster_
     
     [self_solverUse] = wsF.generalRecvParamServer(connection,globallayertopic,['solverUse'],'block')
     self_plannerstr = None
-    solverToMapTypedict = {'OMPL': True}
+    solverToMapTypedict = {'OMPL': True, 'other': False}
     self_mapIsRasterNotPolygons = None
     if (self_passthrough == 'no'): # then we are computing paths and need these things
         self_mapIsRasterNotPolygons = solverToMapTypedict[self_solverUse]
